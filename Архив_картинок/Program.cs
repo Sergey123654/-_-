@@ -2,24 +2,21 @@
 using System.IO;
 using System.IO.Compression;
 namespace Photo_Archive
-{
-
-    class SearchPicture
+{ 
+    class Picture
     {
         private string SourcePath { get; set; }
         private string TargetPath { get; set; }
-        private string name { get; set; }
-        public SearchPicture(string source, string target, string Name)
+        private string nameOfZip { get; set; }
+        public Picture(string source, string target, string Name)
         {
             SourcePath = source;
             TargetPath = target;
-            name = Name;
+            nameOfZip = Name;
         }
-        public void SearchAndCopy()
+        public void CreatePhotoArchive()
         {
-            string new_catalog = $"{TargetPath}\\{name}";
-            Directory.CreateDirectory(new_catalog);
-            string[] files = Directory.GetFiles(SourcePath, "*.*", SearchOption.AllDirectories);
+            string[]  files= Directory.GetFiles(SourcePath, "*.*", SearchOption.AllDirectories);
             foreach (string file in files)
             {
                 FileInfo fileInf = new FileInfo(file);
@@ -28,9 +25,19 @@ namespace Photo_Archive
                (fileInf.Extension == ".bmp") ||
                (fileInf.Extension == ".jpeg"))
                 {
-                    string names = $"{new_catalog}\\{fileInf.Name}";
-                    File.Copy(file, names, true);
+                    AddToArchive(file, fileInf.Name);
                 }
+            }
+        }
+        private void AddToArchive(string PuthOfPicture,string nameOfPicture)
+        {
+            using (FileStream zipToOpen = new FileStream($"{TargetPath}\\{nameOfZip}.zip", FileMode.OpenOrCreate))
+            {
+                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                {
+                    archive.CreateEntryFromFile(PuthOfPicture,nameOfPicture);
+                }
+                zipToOpen.Close();
             }
         }
     }
@@ -39,25 +46,23 @@ namespace Photo_Archive
         static void Main(string[] args)
         {
             Console.WriteLine("Input path of source:");
-            string source = Console.ReadLine();
-            while (Directory.Exists(source) == false)
+            string sourcePath = Console.ReadLine();
+            while (!Directory.Exists(sourcePath))
             {
                 Console.WriteLine("Error!Input path of source:");
-                source = Console.ReadLine();
+                sourcePath = Console.ReadLine();
             }
             Console.WriteLine("Input path of target:");
-            string target = Console.ReadLine();
-            while (Directory.Exists(target) == false)
+            string targetPath = Console.ReadLine();
+            while (!Directory.Exists(targetPath))
             {
                 Console.WriteLine("Error!Input path of target:");
-                target = Console.ReadLine();
+                targetPath = Console.ReadLine();
             }
             Console.WriteLine("Input name of zip:");
-            string name = Console.ReadLine();
-            SearchPicture s = new SearchPicture(source, target, name);
-            s.SearchAndCopy();
-            ZipFile.CreateFromDirectory($"{target}\\{name}", $"{target}\\{name}.zip");
-            Directory.Delete($"{target}\\{name}");
+            string nameOfZip = Console.ReadLine();
+            Picture search = new Picture(sourcePath, targetPath, nameOfZip);
+            search.CreatePhotoArchive();
             Console.ReadLine();
         }
     }
