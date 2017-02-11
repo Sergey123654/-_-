@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-namespace Архив_картинок
+namespace Photo_Archive
 {
+
     class SearchPicture
     {
-        private string SourcePath {get; set;}
+        private string SourcePath { get; set; }
         private string TargetPath { get; set; }
         private string name { get; set; }
         public SearchPicture(string source, string target, string Name)
@@ -16,7 +17,7 @@ namespace Архив_картинок
         }
         public void SearchAndCopy()
         {
-            string new_catalog = TargetPath + @"\" + name;
+            string new_catalog = $"{TargetPath}\\{name}";
             Directory.CreateDirectory(new_catalog);
             string[] files = Directory.GetFiles(SourcePath, "*.*", SearchOption.AllDirectories);
             foreach (string file in files)
@@ -27,7 +28,7 @@ namespace Архив_картинок
                (fileInf.Extension == ".bmp") ||
                (fileInf.Extension == ".jpeg"))
                 {
-                    string names = new_catalog + @"\" + fileInf.Name;
+                    string names = $"{new_catalog}\\{fileInf.Name}";
                     File.Copy(file, names, true);
                 }
             }
@@ -55,8 +56,8 @@ namespace Архив_картинок
             string name = Console.ReadLine();
             SearchPicture s = new SearchPicture(source, target, name);
             s.SearchAndCopy();
-            ZipFile.CreateFromDirectory((target + @"\" + name), target + @"\" + name + ".zip");
-            Directory.Delete(target + @"\" + name);
+            ZipFile.CreateFromDirectory($"{target}\\{name}", $"{target}\\{name}.zip");
+            Directory.Delete($"{target}\\{name}");
             Console.ReadLine();
         }
     }
